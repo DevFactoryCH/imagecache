@@ -34,6 +34,13 @@ class Imagecache {
   protected $preset;
 
   /**
+   * The laravel public directory
+   *
+   * @var string
+   */
+  protected $public_path;
+
+  /**
    * The base directory to look for files taken from config
    *
    * @var string
@@ -69,6 +76,7 @@ class Imagecache {
   public function __construct()  {
     $this->file_dir_default = Config::get('imagecache::config.files_directory');
     $this->ic_dir = Config::get('imagecache::config.imagecache_directory');
+    $this->public_path = Config::get('imagecache::config.public_path');
   }
 
   /**
@@ -216,7 +224,7 @@ class Imagecache {
    * @return string
    */
   private function get_cached_image_path() {
-    return $this->ic_dir . $this->preset .'/'. $this->file_name;
+    return $this->file_dir . $this->ic_dir . $this->preset .'/'. $this->file_name;
   }
 
   /**
@@ -226,6 +234,24 @@ class Imagecache {
    */
   private function get_original_image_path() {
     return $this->file_dir . $this->file_name;
+  }
+
+  /**
+   * The full path to the original image relative to the file system root
+   *
+   * @return string
+   */
+  private function get_full_path_to_original_image() {
+    return $this->public_path .'/'. $this->file_dir . $this->file_name;
+  }
+
+  /**
+   * The full path to the cached image relative to the file system root
+   *
+   * @return string
+   */
+  private function get_full_path_to_cached_image() {
+    return $this->public_path .'/'. $this->get_cached_image_path();
   }
 
   /**
@@ -268,10 +294,11 @@ class Imagecache {
    */
   private function image_element() {
     $cached_image_path = $this->get_cached_image_path();
+
     $preset = $this->get_preset();
     $class = $this->get_class();
 
-    $data['path'] = $this->get_original_image_path();
+    $data['path'] = $this->get_full_path_to_cached_image();
     $data['src'] = \URL::asset(ltrim($cached_image_path, '.'));
     $data['img'] = '<img src="'. $data['src'] .'" width="'. $preset['width'] .'" height="'. $preset['height'] .'" alt="" '. $class .'/>';
     $data['img_nosize'] = '<img src="'. $data['src'] .'" alt=""'. $class .'/>';
