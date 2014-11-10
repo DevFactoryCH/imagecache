@@ -2,16 +2,21 @@
 
 return array(
   /**
-   * The location of the directory where you store uploaded files on the
-   * site relative to the laravel root
+   * The location of the public folder for your laravel installation
    */
-  'files_directory' => './files/',
+  'public_path'  => public_path(),
+
+  /**
+   * The location of the directory where you keep your uploaded images on the
+   * site relative to the laravel public directory
+   */
+  'files_directory' => 'uploads/',
 
   /**
    * The location of the directory where you would like to store
-   * the rendered image cache files
+   * the rendered Imagecache files relative to the files_directory above
    */
-  'imagecache_directory' => './files/imagecache/',
+  'imagecache_directory' => 'imagecache/',
 
   /**
    * Key value pair of presets with the name and dimensions to be used
@@ -36,6 +41,6 @@ return array(
       'width' => 100,
       'height' => 100,
       'aspect_ratio' => 1,
-    )
+    ),
   ),
 );
