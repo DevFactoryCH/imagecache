@@ -1,14 +1,14 @@
-<?php namespace Devfactory\Imagecache\Facade;
+<?php namespace Devfactory\Imagecache\Facades;
 
 use Illuminate\Support\Facades\Facade;
- 
-class Imagecache extends Facade {
- 
+
+class ImagecacheFacade extends Facade {
+
     /**
      * Get the registered name of the component.
      *
      * @return string
      */
     protected static function getFacadeAccessor() { return 'imagecache'; }
- 
+
 }

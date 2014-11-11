@@ -14,7 +14,7 @@ class ImagecacheServiceProvider extends ServiceProvider {
 
 	public function boot()
 	{
-		$this->package('devfactory/imagecache');
+		$this->package('devfactory/imagecache', 'imagecache', __DIR__);
 	}
 
 	/**
@@ -28,13 +28,6 @@ class ImagecacheServiceProvider extends ServiceProvider {
     {
         return new Imagecache;
     });
-
-
-		$this->app->booting(function()
-		{
-		  $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-		  $loader->alias('Imagecache', 'Devfactory\Imagecache\Facade\Imagecache');
-		});
 	}
 
 	/**

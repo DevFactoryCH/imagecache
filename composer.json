@@ -1,21 +1,27 @@
 {
-    "name": "devfactory/imagecache",
-    "description": "",
-    "authors": [
-        {
-            "name": "xdubois",
-            "email": "mathieu.dubois@devfactory.ch"
-        }
-    ],
-    "require": {
-        "php": ">=5.3.0",
-        "illuminate/support": "4.*",
-        "intervention/image": "1.*"
-    },
-    "autoload": {
-        "psr-0": {
-            "Devfactory\\Imagecache": "src/"
-        }
-    },
-    "minimum-stability": "stable"
+  "name": "devfactory/imagecache",
+  "description": "Laravel package for generating thumbnails of images and caching them in your public files folder.",
+  "version": "2.0.0",
+  "authors": [
+    {
+      "name": "DevFactory Sarl",
+      "email": "developer@devfactory.ch"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "illuminate/support": "4.*",
+    "intervention/image": "1.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Devfactory\\Imagecache\\": "src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "2.0.x-dev"
+    }
+  },
+  "minimum-stability": "stable"
 }

@@ -271,7 +271,7 @@ class Imagecache {
    * @return array
    */
   private function get_presets() {
-    return Config::get('imagecache::config.presets');
+    return Config::get('imagecache::presets');
   }
 
   /**
