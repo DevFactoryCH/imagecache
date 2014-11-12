@@ -14,9 +14,10 @@ Then from the terminal run
 
     composer update
 
-Then in your `app/config/app.php` file register the service provider:
+Then in your `app/config/app.php` file register the following service providers:
 
-    'Devfactory\Imagecache\ImagecacheServiceProvider'
+    'Intervention\Image\ImageServiceProvider',
+    'Devfactory\Imagecache\ImagecacheServiceProvider',
 
 And the Facade:
 
