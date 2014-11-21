@@ -1,18 +1,4 @@
 <?php namespace Devfactory\Imagecache;
-/**
- * Name:  Imagecache
- *
- * Author: Mark Cameron
- *         mark.oliver.cameron@gmail.com
- *         @zeroFiG
- *
- * Created: 10.04.2013
- *
- * Description:
- * A library for Laravel based off of the functionality of ImageCache for Drupal
- *
- * Ported from my ImageCache library for CodeIgniter
- */
 
 use Illuminate\Support\Facades\Config;
 use Intervention\Image\Facades\Image;
@@ -62,6 +48,13 @@ class Imagecache {
   protected $ic_dir;
 
   /**
+   * The filename of the file relative to the file storage directory ($this->file_dir)
+   *
+   * @var string
+   */
+  protected $filename_field;
+
+  /**
    * The class to add to the image
    *
    * @var string
@@ -74,25 +67,54 @@ class Imagecache {
    * @return void
    */
   public function __construct()  {
-    $this->file_dir_default = Config::get('imagecache::config.files_directory');
-    $this->ic_dir = Config::get('imagecache::config.imagecache_directory');
-    $this->public_path = Config::get('imagecache::config.public_path');
+    $this->file_dir_default = $this->sanitizeDirectoryName(Config::get('imagecache::config.files_directory'), TRUE);
+    $this->ic_dir = $this->sanitizeDirectoryName(Config::get('imagecache::config.imagecache_directory'));
+    $this->public_path = $this->sanitizeDirectoryName(Config::get('imagecache::config.public_path'));
+
+    $this->filename_field = Config::get('imagecache::config.filename_field');
+  }
+
+  /**
+   * Cleanup paths so that they all have a trailing slash, and
+   * optional leading slash
+   *
+   * @param $name string
+   *  The path to sanitize
+   *
+   * @param $keep_leading_slash bool
+   *  TRUE to keep the leading /, otherwise FALSE
+   *
+   * @return string
+   *  The sanitized path
+   */
+  private function sanitizeDirectoryName($name, $keep_leading_slash = FALSE) {
+    if (!$keep_leading_slash) {
+      $name = ltrim($name, '/\\');
+    }
+
+    return rtrim($name, '/\\') . '/';
   }
 
   /**
    * Called by script to get the image information, performs all required steps
    *
-   * @param file_name The name of the file including the path relative to the $config["image_directory"]
-   * @param preset The name of the preset, must be on of $config['presets']
+   * @param $file mixed
+   *  Object/array/string to check for a filename
    *
-   * @return array Containing the imagehg element and src
+   * @param $preset string
+   *   The name of the preset, must be one of the presets in config/presets.php
+   *
+   * @return array
+   *  Containing the cached image src, img, and others
    */
-  public function get($file_name, $preset, $args = NULL) {
-    $this->file_name = $file_name;
+  public function get($file, $preset, $args = NULL) {
+    if (!$this->setFilename($file)) {
+      return $this->image_element_empty();
+    }
+
     $this->preset = $preset;
 
-    $this->file_dir = (isset($args['base_dir']) ? $args['base_dir'] : $this->file_dir_default);
-    $this->class = (isset($args['class']) ? $args['class'] : NULL);
+    $this->setupArguments($args);
 
     if (!$this->validate_preset()) {
       return FALSE;
@@ -113,10 +135,66 @@ class Imagecache {
     return (object) $this->image_element();
   }
 
-  function get_original($file_name) {
-    $this->file_name = $file_name;
+  /**
+   * Get the imagecache array for an empty image
+   *
+   * @param $file mixed
+   *  Object/array/string to check for a filename
+   *
+   * @return array
+   *  An array containing to different image setups
+   */
+  public function get_original($file) {
+    if (!$this->setFilename($file)) {
+      return $this->image_element_empty();
+    }
 
     return $this->image_element_original();
+  }
+
+  /**
+   * Take the passed file and check it to retrieve a filename
+   *
+   * @param $file mixed
+   *  Object/array/string to check for a filename
+   *
+   * @return bool
+   *  TRUE if $this->filename set, otherwise FALSE
+   */
+  private function setFilename($file) {
+    if (is_object($file)) {
+      if (!isset($file->{$this->filename_field})) {
+        return FALSE;
+      }
+
+      $this->file_name = $file->{$this->filename_field};
+      return TRUE;
+    }
+
+    if (is_array($file)) {
+      $this->file_name = $field[$this->filename_field];
+      return TRUE;
+    }
+
+    if (is_string($file)) {
+      $this->file_name = $file;
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Parse the passed arguments and set the instance variables
+   *
+   * @param $args array
+   *  An array of optional parameters as a key => value pair
+   *
+   * @return void
+   */
+  private function setupArguments($args) {
+    $this->file_dir = (isset($args['base_dir']) ? $args['base_dir'] : $this->file_dir_default);
+    $this->class = (isset($args['class']) ? $args['class'] : NULL);
   }
 
   /**
@@ -224,7 +302,7 @@ class Imagecache {
    * @return string
    */
   private function get_cached_image_path() {
-    return $this->file_dir . $this->ic_dir . $this->preset .'/'. $this->file_name;
+    return $this->ic_dir . $this->preset .'/'. $this->file_name;
   }
 
   /**
@@ -242,7 +320,7 @@ class Imagecache {
    * @return string
    */
   private function get_full_path_to_original_image() {
-    return $this->public_path .'/'. $this->file_dir . $this->file_name;
+    return $this->public_path . $this->file_dir . $this->file_name;
   }
 
   /**
@@ -251,7 +329,7 @@ class Imagecache {
    * @return string
    */
   private function get_full_path_to_cached_image() {
-    return $this->public_path .'/'. $this->get_cached_image_path();
+    return $this->public_path . $this->get_cached_image_path();
   }
 
   /**
@@ -298,12 +376,32 @@ class Imagecache {
     $preset = $this->get_preset();
     $class = $this->get_class();
 
-    $data['path'] = $this->get_full_path_to_cached_image();
-    $data['src'] = \URL::asset(ltrim($cached_image_path, '.'));
-    $data['img'] = '<img src="'. $data['src'] .'" width="'. $preset['width'] .'" height="'. $preset['height'] .'" alt="" '. $class .'/>';
-    $data['img_nosize'] = '<img src="'. $data['src'] .'" alt=""'. $class .'/>';
+    $src = \URL::asset(ltrim($cached_image_path, '.'));
+
+    $data = array(
+      'path' => $this->get_full_path_to_cached_image(),
+      'src' => $src,
+      'img' => '<img src="'. $src .'" width="'. $preset['width'] .'" height="'. $preset['height'] .'" alt="" '. $class .'/>',
+      'img_nosize' => '<img src="'. $src .'" alt=""'. $class .'/>',
+    );
 
     return $data;
+  }
+
+  /**
+   * Generate the image element and src to use in the calling script
+   *
+   * @return array
+   */
+  private function image_element_empty() {
+    $data = array(
+      'path' => '',
+      'src' => '',
+      'img' => '',
+      'img_nosize' => '',
+    );
+
+    return (object) $data;
   }
 
   /**
@@ -331,7 +429,7 @@ class Imagecache {
     $presets = $this->get_presets();
 
     foreach ($presets as $key => $preset) {
-      $file_name = $this->ic_dir .'/'. $key .'/'. $this->file_name;
+      $file_name = $this->public_path . $this->ic_dir . $key .'/'. $this->file_name;
       if (file_exists($file_name)) {
         unlink($file_name);
       }
