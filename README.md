@@ -54,7 +54,7 @@ Then call the `get(FILENAME, PRESET)` method:
 $image = Imagecache::get('uploads/images/sunset.jpg', 'teaser');
 ```
 
-`$image` will now contain an array with the following properties:
+`$image` will now contain an stdClass with the following properties:
 
  - `src`
 The URL to the image to be used inside the `<img src="">` attribute
