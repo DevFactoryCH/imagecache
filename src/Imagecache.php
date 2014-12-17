@@ -112,16 +112,14 @@ class Imagecache {
       return $this->image_element_empty();
     }
 
-    $this->preset = $preset;
+    if (!$this->setPreset($preset)) {
+      return $this->image_element_empty();
+    }
 
     $this->setupArguments($args);
 
-    if (!$this->validate_preset()) {
-      return FALSE;
-    }
-
     if (!$this->image_exists()) {
-      return FALSE;
+      return $this->image_element_empty();
     }
 
     if ($this->is_svg()) {
@@ -129,7 +127,7 @@ class Imagecache {
     }
 
     if (!$this->generate_cached_image()) {
-      return FALSE;
+      return $this->image_element_empty();
     }
 
     return (object) $this->image_element();
@@ -150,6 +148,26 @@ class Imagecache {
     }
 
     return $this->image_element_original();
+  }
+
+  /**
+   * Extract preset information from config file according to that chosen by the user
+   *
+   * @param string $preset
+   *  The preset string
+   *
+   * @return bool
+   */
+  private function setPreset($preset) {
+    if (!$this->validate_preset($preset)) {
+      return FALSE;
+    }
+
+    $presets = $this->get_presets();
+    $this->preset = (object) $presets[$preset];
+    $this->preset->name = $preset;
+
+    return TRUE;
   }
 
   /**
@@ -215,8 +233,8 @@ class Imagecache {
    *
    * @return bool
    */
-  private function validate_preset() {
-    if (in_array($this->preset, array_keys($this->get_presets()))) {
+  private function validate_preset($preset) {
+    if (in_array($preset, array_keys($this->get_presets()))) {
       return TRUE;
     }
 
@@ -264,10 +282,8 @@ class Imagecache {
     $cached_image = $this->get_cached_image_path();
 
     if (file_exists($cached_image)) {
-      return TRUE;
+//      return TRUE;
     }
-
-    $preset = $this->get_preset();
 
     $path_info = pathinfo($cached_image);
 
@@ -275,19 +291,9 @@ class Imagecache {
       mkdir($path_info['dirname'], 0777, TRUE);
     }
 
-    $image = Image::make($this->file_dir . $this->file_name);
-
-    if ($preset['width'] == 0) {
-      $image->heighten($preset['height']);
+    if (!($image = $this->buildImage())) {
+      return FALSE;
     }
-    else if ($preset['height'] == 0) {
-      $image->widen($preset['width']);
-    }
-    else {
-      $image->grab($preset['width'], $preset['height']);
-    }
-
-    $image->save($cached_image);
 
     if ($image->save($cached_image)) {
       return TRUE;
@@ -297,12 +303,66 @@ class Imagecache {
   }
 
   /**
+   * Generates and calls the correct method for the generation method used in preset
+   *
+   * @return mixed
+   *  FALSE if no matching method, otherwise the Image Object
+   */
+  private function buildImage () {
+    $method = 'buildImage'. ucfirst($this->preset->method);
+    if (method_exists($this, $method)) {
+      return $this->{$method}();
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Resize the image, contraining the aspect ratio and size
+   *
+   * @return Image Object
+   */
+  private function buildImageResize() {
+    $image = Image::make($this->file_dir . $this->file_name);
+
+    $image->resize($this->preset->width, $this->preset->height , function ($constraint) {
+      $constraint->aspectRatio();
+      $constraint->upsize();
+    });
+
+    $image->resizeCanvas($this->preset->width, $this->preset->height, 'center', FALSE, isset($this->preset->background_color) ? $this->preset->background_color : '#000000');
+
+    return $image;
+  }
+
+  /**
+   * Crop the image to the given size and aspèect ration, ignoring upsize or aspect ratio constraints
+   *
+   * @return
+   */
+  private function buildImageCrop () {
+    $image = Image::make($this->file_dir . $this->file_name);
+
+    if ($this->preset->width == 0) {
+      $image->heighten($this->preset->height);
+    }
+    else if ($this->preset->height == 0) {
+      $image->widen($this->preset->width);
+    }
+    else {
+      $image->grab($this->preset->width, $this->preset->height);
+    }
+
+    return $image;
+  }
+
+  /**
    * Create the path of the imagecache for the given image and preset
    *
    * @return string
    */
   private function get_cached_image_path() {
-    return $this->ic_dir . $this->preset .'/'. $this->file_name;
+    return $this->ic_dir . $this->preset->name .'/'. $this->file_name;
   }
 
   /**
@@ -338,9 +398,7 @@ class Imagecache {
    * @return array
    */
   private function get_preset() {
-    $presets = $this->get_presets();
-
-    return $presets[$this->preset];
+    return $this->preset;
   }
 
   /**
@@ -373,7 +431,6 @@ class Imagecache {
   private function image_element() {
     $cached_image_path = $this->get_cached_image_path();
 
-    $preset = $this->get_preset();
     $class = $this->get_class();
 
     $src = \URL::asset(ltrim($cached_image_path, '.'));
@@ -381,7 +438,7 @@ class Imagecache {
     $data = array(
       'path' => $this->get_full_path_to_cached_image(),
       'src' => $src,
-      'img' => '<img src="'. $src .'" width="'. $preset['width'] .'" height="'. $preset['height'] .'" alt="" '. $class .'/>',
+      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'" alt="" '. $class .'/>',
       'img_nosize' => '<img src="'. $src .'" alt=""'. $class .'/>',
     );
 
