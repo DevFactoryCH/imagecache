@@ -350,7 +350,7 @@ class Imagecache {
       $image->widen($this->preset->width);
     }
     else {
-      $image->grab($this->preset->width, $this->preset->height);
+      $image->fit($this->preset->width, $this->preset->height);
     }
 
     return $image;
