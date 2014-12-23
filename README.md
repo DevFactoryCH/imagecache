@@ -76,6 +76,7 @@ When defining your presets, these are the options you can set:
 |`background_color`|*optional*|The color of the canvas which will be used as a background when using the method `resize`. e.g. `'#FFFFFF'`.|
 
 The `method` property accepts the following types of transformations:
+
 |Method|Description|
 |------|-----------|
 |`crop`|Will smart crop an image to make it fit the desired dimensions. It will cut content of the image off the top/bottom and sides if required to preserve the aspect ratio.|
