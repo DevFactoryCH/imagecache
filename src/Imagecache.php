@@ -282,7 +282,7 @@ class Imagecache {
     $cached_image = $this->get_cached_image_path();
 
     if (file_exists($cached_image)) {
-//      return TRUE;
+      return TRUE;
     }
 
     $path_info = pathinfo($cached_image);
