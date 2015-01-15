@@ -61,6 +61,7 @@ class Imagecache {
    */
   protected $class;
 
+
   /**
    * __construct
    *
@@ -323,7 +324,7 @@ class Imagecache {
    * @return Image Object
    */
   private function buildImageResize() {
-    $image = Image::make($this->file_dir . $this->file_name);
+    $image = Image::make($this->file_dir . $this->file_name)->orientate();
 
     $image->resize($this->preset->width, $this->preset->height , function ($constraint) {
       $constraint->aspectRatio();
@@ -341,7 +342,7 @@ class Imagecache {
    * @return
    */
   private function buildImageCrop () {
-    $image = Image::make($this->file_dir . $this->file_name);
+    $image = Image::make($this->file_dir . $this->file_name)->orientate();
 
     if ($this->preset->width == 0) {
       $image->heighten($this->preset->height);
