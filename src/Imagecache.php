@@ -5,6 +5,15 @@ use Intervention\Image\Facades\Image;
 use Str;
 
 class Imagecache {
+
+  /**
+   * The passed file to create a cached image of.
+   * Can be an object, array or string
+   *
+   * @var mixed
+   */
+  protected $file;
+
   /**
    * The image filename
    *
@@ -61,6 +70,19 @@ class Imagecache {
    */
   protected $class;
 
+  /**
+   * The alt text for the image
+   *
+   * @var string
+   */
+  protected $alt;
+
+  /**
+   * The title text for the image
+   *
+   * @var string
+   */
+  protected $title;
 
   /**
    * __construct
@@ -109,7 +131,9 @@ class Imagecache {
    *  Containing the cached image src, img, and others
    */
   public function get($file, $preset, $args = NULL) {
-    if (!$this->setFilename($file)) {
+    $this->file = $file;
+
+    if (!$this->setFilename()) {
       return $this->image_element_empty();
     }
 
@@ -143,10 +167,14 @@ class Imagecache {
    * @return array
    *  An array containing to different image setups
    */
-  public function get_original($file) {
-    if (!$this->setFilename($file)) {
+  public function get_original($file, $args = NULL) {
+    $this->file = $file;
+
+    if (!$this->setFilename()) {
       return $this->image_element_empty();
     }
+
+    $this->setupArguments($args);
 
     return $this->image_element_original();
   }
@@ -174,29 +202,26 @@ class Imagecache {
   /**
    * Take the passed file and check it to retrieve a filename
    *
-   * @param $file mixed
-   *  Object/array/string to check for a filename
-   *
    * @return bool
    *  TRUE if $this->filename set, otherwise FALSE
    */
-  private function setFilename($file) {
-    if (is_object($file)) {
-      if (!isset($file->{$this->filename_field})) {
+  private function setFilename() {
+    if (is_object($this->file)) {
+      if (!isset($this->file->{$this->filename_field})) {
         return FALSE;
       }
 
-      $this->file_name = $file->{$this->filename_field};
+      $this->file_name = $this->file->{$this->filename_field};
       return TRUE;
     }
 
-    if (is_array($file)) {
+    if (is_array($this->file)) {
       $this->file_name = $field[$this->filename_field];
       return TRUE;
     }
 
-    if (is_string($file)) {
-      $this->file_name = $file;
+    if (is_string($this->file)) {
+      $this->file_name = $this->file;
       return TRUE;
     }
 
@@ -214,6 +239,50 @@ class Imagecache {
   private function setupArguments($args) {
     $this->file_dir = (isset($args['base_dir']) ? $args['base_dir'] : $this->file_dir_default);
     $this->class = (isset($args['class']) ? $args['class'] : NULL);
+    $this->alt = isset($args['alt']) ? $args['alt'] : $this->parseAlt();
+    $this->title = isset($args['title']) ? $args['title'] : $this->parseTitle();
+  }
+
+  /**
+   * If the file received is an object or array, check if the 'alt' field is set
+   *
+   * @return string
+   */
+  private function parseAlt() {
+    if (is_object($this->file)) {
+      if (isset($this->file->alt)) {
+        return $this->file->alt;
+      }
+    }
+
+    if (is_array($this->file)) {
+      if (isset($this->file['alt'])) {
+        return $this->file['alt'];
+      }
+    }
+
+    return '';
+  }
+
+  /**
+   * If the file received is an object or array, check if the 'title' field is set
+   *
+   * @return string
+   */
+  private function parseTitle() {
+    if (is_object($this->file)) {
+      if (isset($this->file->title)) {
+        return $this->file->title;
+      }
+    }
+
+    if (is_array($this->file)) {
+      if (isset($this->file['title'])) {
+        return $this->file['title'];
+      }
+    }
+
+    return '';
   }
 
   /**
@@ -434,13 +503,13 @@ class Imagecache {
 
     $class = $this->get_class();
 
-    $src = \URL::asset(ltrim($cached_image_path, '.'));
+    $src = \URL::asset($cached_image_path);
 
     $data = array(
       'path' => $this->get_full_path_to_cached_image(),
       'src' => $src,
-      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'" alt="" '. $class .'/>',
-      'img_nosize' => '<img src="'. $src .'" alt=""'. $class .'/>',
+      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'" class="" '. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+      'img_nosize' => '<img src="'. $src .'" class=""'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
     );
 
     return $data;
@@ -471,11 +540,11 @@ class Imagecache {
     $path = $this->get_original_image_path();
     $class = $this->get_class();
 
-    $data['src'] = ltrim($path, '.');
-    $data['img'] = '<img src="'. $data['src'] .'" alt="" '. $class .'/>';
-    $data['img_nosize'] = '<img src="'. $data['src'] .'" alt=""'. $class .'/>';
+    $data['src'] = \URL::asset($path);
+    $data['img'] = '<img src="'. $data['src'] .'" class="" '. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
+    $data['img_nosize'] = '<img src="'. $data['src'] .'" class=""'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
 
-    return $data;
+    return (object) $data;
   }
 
   /**
