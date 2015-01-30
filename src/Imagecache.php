@@ -69,7 +69,7 @@ class Imagecache {
   public function __construct()  {
     $this->file_dir_default = $this->sanitizeDirectoryName(Config::get('imagecache::config.files_directory'), TRUE);
     $this->ic_dir = $this->sanitizeDirectoryName(Config::get('imagecache::config.imagecache_directory'));
-    $this->public_path = $this->sanitizeDirectoryName(Config::get('imagecache::config.public_path'));
+    $this->public_path = $this->sanitizeDirectoryName(Config::get('imagecache::config.public_path'), TRUE);
 
     $this->filename_field = Config::get('imagecache::config.filename_field');
   }
