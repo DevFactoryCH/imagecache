@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Config;
 use Intervention\Image\Facades\Image;
-use Str;
+use Illuminate\Support\Str;
 
 class Imagecache {
 
@@ -90,11 +90,11 @@ class Imagecache {
    * @return void
    */
   public function __construct()  {
-    $this->file_dir_default = $this->sanitizeDirectoryName(Config::get('imagecache::config.files_directory'), TRUE);
-    $this->ic_dir = $this->sanitizeDirectoryName(Config::get('imagecache::config.imagecache_directory'));
-    $this->public_path = $this->sanitizeDirectoryName(Config::get('imagecache::config.public_path'), TRUE);
+    $this->file_dir_default = $this->sanitizeDirectoryName(config('imagecache.config.files_directory'), TRUE);
+    $this->ic_dir = $this->sanitizeDirectoryName(config('imagecache.config.imagecache_directory'));
+    $this->public_path = $this->sanitizeDirectoryName(config('imagecache.config.public_path'), TRUE);
 
-    $this->filename_field = Config::get('imagecache::config.filename_field');
+    $this->filename_field = config('imagecache.config.filename_field');
   }
 
   /**
@@ -477,7 +477,7 @@ class Imagecache {
    * @return array
    */
   private function get_presets() {
-    return Config::get('imagecache::presets');
+    return config('imagecache.presets');
   }
 
   /**

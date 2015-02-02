@@ -9,6 +9,8 @@ class ImagecacheFacade extends Facade {
      *
      * @return string
      */
-    protected static function getFacadeAccessor() { return 'imagecache'; }
+    protected static function getFacadeAccessor() {
+      return 'imagecache';
+    }
 
 }
