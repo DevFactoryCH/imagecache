@@ -1,3 +1,6 @@
+[![Laravel](https://img.shields.io/badge/Laravel-5.0-orange.svg?style=flat-square)](http://laravel.com)
+[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
+
 #Imagecache
 
 This package allows you to create image thumbnails according to predefined presets, and store them in your Laravel public folder to serve them up without generating them on each page load.
@@ -61,8 +64,16 @@ $image = Imagecache::get('uploads/images/sunset.jpg', 'teaser');
 The URL to the image to be used inside the `<img src="">` attribute
  - `img`
 The full `<img>` tag to display the image
+ - `img_nosize`
+The full `<img>` tag without *width* and *height* attributes for use with responsive themes
  - `path`
 The full path to the image on storage
+
+You can also directly access one of the properties as such without needing to if gate the call to `get()`. If using Laravel 5 you'll need to use the new raw notation instead of the double curly braces `{{ ... }}`.
+
+```php
+{!! Imagecache::get('uploads/images/sunset.jpg', 'teaser')->img !!}
+```
 
 ## Presets
 
