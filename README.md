@@ -1,13 +1,22 @@
+[![Laravel](https://img.shields.io/badge/Laravel-4.0-orange.svg?style=flat-square)](http://laravel.com)
 [![Laravel](https://img.shields.io/badge/Laravel-5.0-orange.svg?style=flat-square)](http://laravel.com)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
 
 #Imagecache
 
-This package allows you to create image thumbnails according to predefined presets, and store them in your Laravel public folder to serve them up without generating them on each page load.
+Laravel 4/5 package that allows you to create image thumbnails according to predefined presets, and store them in your Laravel public folder to serve them up without generating them on each page load.
 
 ## Installation
 
 Using Composer, edit your `composer.json` file to require `devfactory/imagecache`.
+
+##### Laravel 5
+
+	"require": {
+		"devfactory/imagecache": "3.0.*"
+	}
+
+##### Laravel 4
 
 	"require": {
 		"devfactory/imagecache": "2.1.*"
@@ -19,20 +28,35 @@ Then from the terminal run
 
 Then in your `app/config/app.php` file register the following service providers:
 
-    'Intervention\Image\ImageServiceProvider',
-    'Devfactory\Imagecache\ImagecacheServiceProvider',
+```php
+'Intervention\Image\ImageServiceProvider',
+'Devfactory\Imagecache\ImagecacheServiceProvider',
+```
 
 And the Facade:
 
-    'Imagecache'      => 'Devfactory\Imagecache\Facades\ImagecacheFacade',
-
+```php
+'Imagecache'      => 'Devfactory\Imagecache\Facades\ImagecacheFacade',
+```
 Publish the config:
+
+##### Laravel  5
+
+    php artisan vendor:publish
+
+##### Laravel 4
 
     php artisan config:publish devfactory/imagecache
 
 ## Usage
 
-Define some presets in `app/config/packages/devfactory/imagecache/presets.php`
+Define some presets in:
+
+##### Laravel  5
+`config/imagecache.presets.php`
+
+##### Laravel  4
+`app/config/packages/devfactory/imagecache/presets.php`
 
 ```php
 <?php
@@ -60,16 +84,14 @@ $image = Imagecache::get('uploads/images/sunset.jpg', 'teaser');
 
 `$image` will now contain an stdClass with the following properties:
 
- - `src`
-The URL to the image to be used inside the `<img src="">` attribute
- - `img`
-The full `<img>` tag to display the image
- - `img_nosize`
-The full `<img>` tag without *width* and *height* attributes for use with responsive themes
- - `path`
-The full path to the image on storage
+|Property|Description|
+|------|-----------|
+|`src`|The URL to the image to be used inside the `<img src="">` attribute|
+|`img`|The full `<img>` tag to display the image|
+|`img_nosize`|The full `<img>` tag without *width* and *height* attributes for use with responsive themes|
+|`path`|The full path to the image on storage|
 
-You can also directly access one of the properties as such without needing to if gate the call to `get()`. If using Laravel 5 you'll need to use the new raw notation instead of the double curly braces `{{ ... }}`.
+You can also directly access one of the properties as such without needing to if gate the call to `get()`. If using *Laravel 5* you'll need to use the new raw notation instead of the double curly braces `{{ ... }}`.
 
 ```php
 {!! Imagecache::get('uploads/images/sunset.jpg', 'teaser')->img !!}
