@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Config;
 use Intervention\Image\Facades\Image;
+use File;
 use Str;
 
 class Imagecache {
@@ -430,8 +431,8 @@ class Imagecache {
 
     foreach ($presets as $key => $preset) {
       $file_name = $this->public_path . $this->ic_dir . $key .'/'. $this->file_name;
-      if (file_exists($file_name)) {
-        unlink($file_name);
+      if (File::exists($file_name)) {
+        File::delete($file_name);
       }
     }
   }
