@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Config;
 use Intervention\Image\Facades\Image;
 use File;
-use Str;
 
 class Imagecache {
 
@@ -335,7 +334,7 @@ class Imagecache {
     $finfo = new \finfo(FILEINFO_MIME);
     $type = $finfo->file($this->file_dir . $this->file_name);
 
-    if (Str::contains($type, 'image/svg+xml')) {
+    if (str_contains($type, 'image/svg+xml')) {
       return TRUE;
     }
 
