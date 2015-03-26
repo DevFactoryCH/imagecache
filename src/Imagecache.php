@@ -85,6 +85,13 @@ class Imagecache {
   protected $title;
 
   /**
+   * The quality for the generated image
+   *
+   * @var string
+   */
+  protected $quality;
+
+  /**
    * __construct
    *
    * @return void
@@ -95,6 +102,7 @@ class Imagecache {
     $this->public_path = $this->sanitizeDirectoryName(config('imagecache.config.public_path'), TRUE);
 
     $this->filename_field = config('imagecache.config.filename_field');
+    $this->quality = config('imagecache.config.quality', 90);
   }
 
   /**
@@ -365,7 +373,7 @@ class Imagecache {
       return FALSE;
     }
 
-    if ($image->save($cached_image)) {
+    if ($image->save($cached_image, $this->quality)) {
       return TRUE;
     }
 

@@ -23,4 +23,10 @@ return array(
    * or an object instead of a string to the get() method
    */
   'filename_field' => 'filename',
+
+  /**
+   * The quality of the generated image. Possbile values are
+   * 0 (worst) - 100 (best). Only applies for JPEG images.
+   */
+  'quality' => 90,
 );
