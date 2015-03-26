@@ -23,4 +23,9 @@ return array(
    * or an object instead of a string to the get() method
    */
   'filename_field' => 'filename',
+
+  /**
+   * The quality for the generated image
+   */
+  'quality' => 90,
 );
