@@ -25,7 +25,8 @@ return array(
   'filename_field' => 'filename',
 
   /**
-   * The quality for the generated image
+   * The quality of the generated image. Possbile values are
+   * 0 (worst) - 100 (best). Only applies for JPEG images.
    */
   'quality' => 90,
 );
