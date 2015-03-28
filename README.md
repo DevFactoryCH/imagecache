@@ -76,7 +76,7 @@ return array(
 );
 ```
 
-### get(\$filename, \$preset, \$args = NULL)
+### get($filename, $preset, $args = NULL)
 
 |Parameter|Description|
 |------|-----------|
@@ -117,11 +117,11 @@ You can also directly access one of the properties as such without needing to if
 {!! Imagecache::get('uploads/images/sunset.jpg', 'teaser')->img !!}
 ```
 
-### get_original(\$filename, \$args = NULL)
+### get_original($filename, $args = NULL)
 
 If you don't want to apply any preset to the image, but still want to use the call to generate the `<img>` tag, accepts same parameters and works the same way as `get()`, just without `$preset`
 
-### delete(\$filename)
+### delete($filename)
 
 Deletes all the cached images for each preset for the given filename.
 
