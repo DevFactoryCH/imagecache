@@ -60,6 +60,7 @@ Define some presets in:
 
 ```php
 <?php
+
 return array(
   'teaser' => array(
     'width' => 150,
@@ -75,15 +76,24 @@ return array(
 );
 ```
 
-Then call the `get(FILENAME, PRESET)` method:
+### get(\$filename, \$preset, \$args = NULL)
 
-```php
-<?php
-$image = Imagecache::get('uploads/images/sunset.jpg', 'teaser');
-```
+|Parameter|Description|
+|------|-----------|
+|`$filename`|The FILENAME passed to the `get()` method is relative to the `files_directory` that you set in the config file (which itself is relative to the `public_path` config). So if you pass `images/sunset.jpg`, it will actually look for `PUBLIC_PATH/uplaods/images/sunset.jpg` with the default config. I haven't tried, but if you set `public_path` and `files_directory` to `''`, you should be able to pass aa absolute path to the file.|
+|`$preset`|One of the presets defined in the presets.php config file|
+|`$args` *(optional)*|An array of additional properties.|
 
-`$image` will now contain an stdClass with the following properties:
+#### $args properties
 
+|Property|Description|
+|------|-----------|
+|`base_dir`|If you don't want to use the base folder you have setup in the config file because you are referencing a file that might be stored in your assets, you can pass an absolute path here to override the defaults|
+|`class`|A string containing any classes you want the `<img>` tag to contain|
+|`alt`|The `alt` text for the image|
+|`title`|The `title` text for the image|
+
+####Return Value:
 |Property|Description|
 |------|-----------|
 |`src`|The URL to the image to be used inside the `<img src="">` attribute|
@@ -91,11 +101,29 @@ $image = Imagecache::get('uploads/images/sunset.jpg', 'teaser');
 |`img_nosize`|The full `<img>` tag without *width* and *height* attributes for use with responsive themes|
 |`path`|The full path to the image on storage|
 
+Example usages:
+
+```php
+$image = Imagecache::get('images/sunset.jpg', 'teaser');
+echo $image->img;
+echo '<img src="'. $image->src .'">
+
+// Directly in a blade template
+{{ Imagecache::get('uploads/images/sunset.jpg', 'teaser')->img }}
+```
 You can also directly access one of the properties as such without needing to if gate the call to `get()`. If using *Laravel 5* you'll need to use the new raw notation instead of the double curly braces `{{ ... }}`.
 
 ```php
 {!! Imagecache::get('uploads/images/sunset.jpg', 'teaser')->img !!}
 ```
+
+### get_original(\$filename, \$args = NULL)
+
+If you don't want to apply any preset to the image, but still want to use the call to generate the `<img>` tag, accepts same parameters and works the same way as `get()`, just without `$preset`
+
+### delete(\$filename)
+
+Deletes all the cached images for each preset for the given filename.
 
 ## Presets
 
