@@ -516,8 +516,8 @@ class Imagecache {
     $data = array(
       'path' => $this->get_full_path_to_cached_image(),
       'src' => $src,
-      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'" class="" '. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
-      'img_nosize' => '<img src="'. $src .'" class=""'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+      'img_nosize' => '<img src="'. $src .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
     );
 
     return $data;
@@ -549,8 +549,8 @@ class Imagecache {
     $class = $this->get_class();
 
     $data['src'] = \URL::asset($path);
-    $data['img'] = '<img src="'. $data['src'] .'" class="" '. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
-    $data['img_nosize'] = '<img src="'. $data['src'] .'" class=""'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
+    $data['img'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
+    $data['img_nosize'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
 
     return (object) $data;
   }
