@@ -155,6 +155,10 @@ class Imagecache {
       return $this->image_element_empty();
     }
 
+    if (!$this->is_image()) {
+      return $this->image_element_empty();
+    }
+
     if ($this->is_svg()) {
       return (object) $this->image_element_original();
     }
@@ -343,6 +347,23 @@ class Imagecache {
     $type = $finfo->file($this->file_dir . $this->file_name);
 
     if (str_contains($type, 'image/svg+xml')) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Checks if we have an image.
+   *
+   * @return
+   *   TRUE if Image and FALSE otherwise
+   */
+  private function is_image() {
+    $finfo = new \finfo(FILEINFO_MIME);
+    $type = $finfo->file($this->file_dir . $this->file_name);
+
+    if (str_contains($type, 'image')) {
       return TRUE;
     }
 
