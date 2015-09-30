@@ -326,7 +326,7 @@ class Imagecache {
    * @return bool
    */
   private function image_exists() {
-    if (file_exists($this->file_dir . $this->file_name)) {
+    if (file_exists($this->public_path . $this->file_dir . $this->file_name)) {
       return TRUE;
     }
 
@@ -341,7 +341,7 @@ class Imagecache {
    */
   private function is_svg() {
     $finfo = new \finfo(FILEINFO_MIME);
-    $type = $finfo->file($this->file_dir . $this->file_name);
+    $type = $finfo->file($this->public_path . $this->file_dir . $this->file_name);
 
     if (Str::contains($type, 'image/svg+xml')) {
       return TRUE;
@@ -402,7 +402,7 @@ class Imagecache {
    * @return Image Object
    */
   private function buildImageResize() {
-    $image = Image::make($this->file_dir . $this->file_name)->orientate();
+    $image = Image::make($this->public_path . $this->file_dir . $this->file_name)->orientate();
 
     $image->resize($this->preset->width, $this->preset->height , function ($constraint) {
       $constraint->aspectRatio();
@@ -420,7 +420,7 @@ class Imagecache {
    * @return
    */
   private function buildImageCrop () {
-    $image = Image::make($this->file_dir . $this->file_name)->orientate();
+    $image = Image::make($this->public_path . $this->file_dir . $this->file_name)->orientate();
 
     if ($this->preset->width == 0) {
       $image->heighten($this->preset->height);
