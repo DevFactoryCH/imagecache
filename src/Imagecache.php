@@ -356,7 +356,25 @@ class Imagecache {
     $finfo = new \finfo(FILEINFO_MIME);
     $type = $finfo->file($this->upload_path . $this->file_name);
 
-    if (Str::contains($type, 'image/svg+xml')) {
+    if (str_contains($type, 'image/svg+xml')) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Checks if we have an image.
+   *
+   * @return
+   *   TRUE if Image and FALSE otherwise
+   */
+  private function is_image() {
+    $finfo = new \finfo(FILEINFO_MIME);
+    $type = $finfo->file($this->upload_path . $this->file_name);
+
+    if (str_contains($type, 'image')) {
+>>>>>>> c7a7747... Fixed a couple bugs where I missed a new varaible or put the wrong one
       return TRUE;
     }
 
@@ -463,7 +481,7 @@ class Imagecache {
    * @return string
    */
   private function get_original_image_path() {
-    return $this->upload_path . $this->file_name;
+    return $this->upload_uri . $this->file_name;
   }
 
   /**
