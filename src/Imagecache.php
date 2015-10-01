@@ -374,7 +374,7 @@ class Imagecache {
    */
   private function is_image() {
     $finfo = new \finfo(FILEINFO_MIME);
-    $type = $finfo->file($this->file_dir . $this->file_name);
+    $type = $finfo->file($this->upload_path . $this->file_name);
 
     if (str_contains($type, 'image')) {
       return TRUE;
@@ -483,7 +483,7 @@ class Imagecache {
    * @return string
    */
   private function get_original_image_path() {
-    return $this->upload_path . $this->file_name;
+    return $this->upload_uri . $this->file_name;
   }
 
   /**
