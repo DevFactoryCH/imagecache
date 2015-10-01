@@ -117,6 +117,8 @@ You can also directly access one of the properties as such without needing to if
 {!! Imagecache::get('uploads/images/sunset.jpg', 'teaser')->img !!}
 ```
 
+If you set the `use_placeholders` variable to `TRUE` in the `imagecache.config.php` file, and your image doesn't exist or doesn't generate a cached version. Where you would normally receive an array with empty values, you can get a placeholder image matching the preset that you requested. This is very useful during developement when you might not have images for all your content.
+
 ### get_original($filename, $args = NULL)
 
 If you don't want to apply any preset to the image, but still want to use the call to generate the `<img>` tag, accepts same parameters and works the same way as `get()`, just without `$preset`
