@@ -99,6 +99,13 @@ class Imagecache {
   protected $quality;
 
   /**
+   * Whether or not to use placeholders
+   *
+   * @var boolen
+   */
+  protected $use_placeholders;
+
+  /**
    * __construct
    *
    * @return void
@@ -114,6 +121,7 @@ class Imagecache {
 
     $this->filename_field = config('imagecache.config.filename_field');
     $this->quality = config('imagecache.config.quality', 90);
+    $this->use_placeholders = config('imagecache.use_placeholders', FALSE);
   }
 
   /**
@@ -552,6 +560,10 @@ class Imagecache {
    * @return array
    */
   private function image_element_empty() {
+    if ($this->use_placeholders) {
+      return $this->generate_placeholder();
+    }
+
     $data = array(
       'path' => '',
       'src' => '',
@@ -561,6 +573,22 @@ class Imagecache {
 
     return (object) $data;
   }
+
+  private function generate_placeholder() {
+    $src = 'http://www.placeholdr.pics/'. $this->preset->width .'x'. $this->preset->height;
+
+    $class = $this->get_class();
+
+    $data = array(
+      'path' => '',
+      'src' => $src,
+      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+      'img_nosize' => '<img src="'. $src .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+    );
+
+    return (object) $data;
+  }
+
 
   /**
    * Generate the image element and src to use in the calling script
