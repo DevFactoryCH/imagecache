@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Config;
 use Intervention\Image\Facades\Image;
 use File;
-use Str;
 
 class Imagecache {
 
@@ -37,28 +36,35 @@ class Imagecache {
   protected $public_path;
 
   /**
-   * The base directory to look for files taken from config
+   * The URI relative to the public path where images are stored/uploaded
    *
    * @var string
    **/
-  protected $file_dir_default;
+  protected $upload_uri;
 
   /**
-   * The directory in which to look for the file
+   * The absolute path where images are stored/uploaded
    *
    * @var string
    **/
-  protected $file_dir;
+  protected $upload_path;
 
   /**
-   * The directory name to story all the imagecaches
+   * The URI relative to the public path where cached images are to be stored
    *
    * @var string
    **/
-  protected $ic_dir;
+  protected $imagecache_uri;
 
   /**
-   * The filename of the file relative to the file storage directory ($this->file_dir)
+   * The absolute path where cached images are to be stored
+   *
+   * @var string
+   **/
+  protected $imagecache_path;
+
+  /**
+   * The filename of the file relative to the file storage directory ($this->upload_path)
    *
    * @var string
    */
@@ -86,16 +92,36 @@ class Imagecache {
   protected $title;
 
   /**
+   * The quality for the generated image
+   *
+   * @var string
+   */
+  protected $quality;
+
+  /**
+   * Whether or not to use placeholders
+   *
+   * @var boolen
+   */
+  protected $use_placeholders;
+
+  /**
    * __construct
    *
    * @return void
    */
   public function __construct()  {
-    $this->file_dir_default = $this->sanitizeDirectoryName(Config::get('imagecache::config.files_directory'), TRUE);
-    $this->ic_dir = $this->sanitizeDirectoryName(Config::get('imagecache::config.imagecache_directory'));
-    $this->public_path = $this->sanitizeDirectoryName(Config::get('imagecache::config.public_path'), TRUE);
+    $this->public_path = $this->sanitizeDirectoryName(config('imagecache.config.public_path'), TRUE);
 
-    $this->filename_field = Config::get('imagecache::config.filename_field');
+    $this->upload_uri = $this->sanitizeDirectoryName(config('imagecache.config.files_directory'), TRUE);
+    $this->upload_path = $this->public_path . $this->upload_uri;
+
+    $this->imagecache_uri = $this->sanitizeDirectoryName(config('imagecache.config.imagecache_directory'));
+    $this->imagecache_path = $this->public_path . $this->imagecache_uri;
+
+    $this->filename_field = config('imagecache.config.filename_field');
+    $this->quality = config('imagecache.config.quality', 90);
+    $this->use_placeholders = config('imagecache.config.use_placeholders', FALSE);
   }
 
   /**
@@ -145,6 +171,10 @@ class Imagecache {
     $this->setupArguments($args);
 
     if (!$this->image_exists()) {
+      return $this->image_element_empty();
+    }
+
+    if (!$this->is_image()) {
       return $this->image_element_empty();
     }
 
@@ -238,7 +268,7 @@ class Imagecache {
    * @return void
    */
   private function setupArguments($args) {
-    $this->file_dir = (isset($args['base_dir']) ? $args['base_dir'] : $this->file_dir_default);
+    $this->upload_path = (isset($args['base_dir']) ? $args['base_dir'] : $this->upload_path);
     $this->class = (isset($args['class']) ? $args['class'] : NULL);
     $this->alt = isset($args['alt']) ? $args['alt'] : $this->parseAlt();
     $this->title = isset($args['title']) ? $args['title'] : $this->parseTitle();
@@ -318,7 +348,7 @@ class Imagecache {
    * @return bool
    */
   private function image_exists() {
-    if (file_exists($this->file_dir . $this->file_name)) {
+    if (file_exists($this->upload_path . $this->file_name)) {
       return TRUE;
     }
 
@@ -333,9 +363,26 @@ class Imagecache {
    */
   private function is_svg() {
     $finfo = new \finfo(FILEINFO_MIME);
-    $type = $finfo->file($this->file_dir . $this->file_name);
+    $type = $finfo->file($this->upload_path . $this->file_name);
 
-    if (Str::contains($type, 'image/svg+xml')) {
+    if (str_contains($type, 'image/svg+xml')) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Checks if we have an image.
+   *
+   * @return
+   *   TRUE if Image and FALSE otherwise
+   */
+  private function is_image() {
+    $finfo = new \finfo(FILEINFO_MIME);
+    $type = $finfo->file($this->upload_path . $this->file_name);
+
+    if (str_contains($type, 'image')) {
       return TRUE;
     }
 
@@ -366,7 +413,7 @@ class Imagecache {
       return FALSE;
     }
 
-    if ($image->save($cached_image)) {
+    if ($image->save($cached_image, $this->quality)) {
       return TRUE;
     }
 
@@ -394,7 +441,7 @@ class Imagecache {
    * @return Image Object
    */
   private function buildImageResize() {
-    $image = Image::make($this->file_dir . $this->file_name)->orientate();
+    $image = Image::make($this->upload_path . $this->file_name)->orientate();
 
     $image->resize($this->preset->width, $this->preset->height , function ($constraint) {
       $constraint->aspectRatio();
@@ -412,7 +459,7 @@ class Imagecache {
    * @return
    */
   private function buildImageCrop () {
-    $image = Image::make($this->file_dir . $this->file_name)->orientate();
+    $image = Image::make($this->upload_path . $this->file_name)->orientate();
 
     if ($this->preset->width == 0) {
       $image->heighten($this->preset->height);
@@ -433,7 +480,7 @@ class Imagecache {
    * @return string
    */
   private function get_cached_image_path() {
-    return $this->ic_dir . $this->preset->name .'/'. $this->file_name;
+    return $this->imagecache_uri . $this->preset->name .'/'. $this->file_name;
   }
 
   /**
@@ -442,16 +489,7 @@ class Imagecache {
    * @return string
    */
   private function get_original_image_path() {
-    return $this->file_dir . $this->file_name;
-  }
-
-  /**
-   * The full path to the original image relative to the file system root
-   *
-   * @return string
-   */
-  private function get_full_path_to_original_image() {
-    return $this->public_path . $this->file_dir . $this->file_name;
+    return $this->upload_uri . $this->file_name;
   }
 
   /**
@@ -478,7 +516,7 @@ class Imagecache {
    * @return array
    */
   private function get_presets() {
-    return Config::get('imagecache::presets');
+    return config('imagecache.presets');
   }
 
   /**
@@ -509,8 +547,8 @@ class Imagecache {
     $data = array(
       'path' => $this->get_full_path_to_cached_image(),
       'src' => $src,
-      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'" class="" '. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
-      'img_nosize' => '<img src="'. $src .'" class=""'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+      'img_nosize' => '<img src="'. $src .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
     );
 
     return $data;
@@ -522,6 +560,10 @@ class Imagecache {
    * @return array
    */
   private function image_element_empty() {
+    if ($this->use_placeholders) {
+      return $this->generate_placeholder();
+    }
+
     $data = array(
       'path' => '',
       'src' => '',
@@ -531,6 +573,22 @@ class Imagecache {
 
     return (object) $data;
   }
+
+  private function generate_placeholder() {
+    $src = 'http://www.placeholdr.pics/'. $this->preset->width .'/'. $this->preset->height;
+
+    $class = $this->get_class();
+
+    $data = array(
+      'path' => '',
+      'src' => $src,
+      'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+      'img_nosize' => '<img src="'. $src .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
+    );
+
+    return (object) $data;
+  }
+
 
   /**
    * Generate the image element and src to use in the calling script
@@ -542,8 +600,8 @@ class Imagecache {
     $class = $this->get_class();
 
     $data['src'] = \URL::asset($path);
-    $data['img'] = '<img src="'. $data['src'] .'" class="" '. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
-    $data['img_nosize'] = '<img src="'. $data['src'] .'" class=""'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
+    $data['img'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
+    $data['img_nosize'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
 
     return (object) $data;
   }
@@ -556,7 +614,7 @@ class Imagecache {
     $presets = $this->get_presets();
 
     foreach ($presets as $key => $preset) {
-      $file_name = $this->public_path . $this->ic_dir . $key .'/'. $this->file_name;
+      $file_name = $this->imagecache_path . $key .'/'. $this->file_name;
       if (File::exists($file_name)) {
         File::delete($file_name);
       }

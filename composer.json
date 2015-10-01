@@ -10,17 +10,12 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "illuminate/support": "4.*",
-    "intervention/image": "2.*"
+    "illuminate/support": "~5.0",
+    "intervention/image": "~2.1"
   },
   "autoload": {
     "psr-4": {
       "Devfactory\\Imagecache\\": "src/"
-    }
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "2.1.x-dev"
     }
   },
   "minimum-stability": "stable"

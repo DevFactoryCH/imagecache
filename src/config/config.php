@@ -23,4 +23,19 @@ return array(
    * or an object instead of a string to the get() method
    */
   'filename_field' => 'filename',
+
+  /**
+   * The quality of the generated image. Possbile values are
+   * 0 (worst) - 100 (best). Only applies for JPEG images.
+   */
+  'quality' => 90,
+
+  /**
+   * If you don't have any images to use, or want to save time by not
+   * uploading an image. Setting this to true will generate you images
+   * matching your height and width settings.
+   *
+   * Served through www.placeholdr.pics
+   */
+  'use_placeholders' => FALSE,
 );
