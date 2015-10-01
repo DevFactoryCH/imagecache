@@ -36,6 +36,12 @@ class Imagecache {
    */
   protected $public_path;
 
+  protected $upload_uri;
+  protected $upload_path;
+
+  protected $imagecache_uri;
+  protected $imagecache_path;
+
   /**
    * The base directory to look for files taken from config
    *
@@ -58,7 +64,7 @@ class Imagecache {
   protected $ic_dir;
 
   /**
-   * The filename of the file relative to the file storage directory ($this->file_dir)
+   * The filename of the file relative to the file storage directory ($this->upload_path)
    *
    * @var string
    */
@@ -98,12 +104,19 @@ class Imagecache {
    * @return void
    */
   public function __construct()  {
-    $this->file_dir_default = $this->sanitizeDirectoryName(Config::get('imagecache::config.files_directory'), TRUE);
-    $this->ic_dir = $this->sanitizeDirectoryName(Config::get('imagecache::config.imagecache_directory'));
-    $this->public_path = $this->sanitizeDirectoryName(Config::get('imagecache::config.public_path'), TRUE);
+    $this->public_path = $this->sanitizeDirectoryName(config('imagecache.config.public_path'), TRUE);
 
-    $this->filename_field = Config::get('imagecache::config.filename_field');
-    $this->quality = Config::get('imagecache::config.quality', 90);
+    $this->upload_uri = $this->sanitizeDirectoryName(config('imagecache.config.files_directory'), TRUE);
+    $this->upload_path = $this->public_path . $this->upload_uri;
+
+    $this->imagecache_uri = $this->sanitizeDirectoryName(config('imagecache.config.imagecache_directory'));
+    $this->imagecache_path = $this->public_path . $this->imagecache_uri;
+
+//    $this->ic_dir = $this->sanitizeDirectoryName(config('imagecache.config.imagecache_directory'));
+//    $this->file_dir_default = $this->public_path . $this->sanitizeDirectoryName(config('imagecache.config.files_directory'), TRUE);
+
+    $this->filename_field = config('imagecache.config.filename_field');
+    $this->quality = config('imagecache.config.quality', 90);
   }
 
   /**
@@ -246,7 +259,7 @@ class Imagecache {
    * @return void
    */
   private function setupArguments($args) {
-    $this->file_dir = (isset($args['base_dir']) ? $args['base_dir'] : $this->file_dir_default);
+    $this->upload_path = (isset($args['base_dir']) ? $args['base_dir'] : $this->upload_path);
     $this->class = (isset($args['class']) ? $args['class'] : NULL);
     $this->alt = isset($args['alt']) ? $args['alt'] : $this->parseAlt();
     $this->title = isset($args['title']) ? $args['title'] : $this->parseTitle();
@@ -326,7 +339,7 @@ class Imagecache {
    * @return bool
    */
   private function image_exists() {
-    if (file_exists($this->file_dir . $this->file_name)) {
+    if (file_exists($this->upload_path . $this->file_name)) {
       return TRUE;
     }
 
@@ -341,7 +354,7 @@ class Imagecache {
    */
   private function is_svg() {
     $finfo = new \finfo(FILEINFO_MIME);
-    $type = $finfo->file($this->file_dir . $this->file_name);
+    $type = $finfo->file($this->upload_path . $this->file_name);
 
     if (Str::contains($type, 'image/svg+xml')) {
       return TRUE;
@@ -402,7 +415,7 @@ class Imagecache {
    * @return Image Object
    */
   private function buildImageResize() {
-    $image = Image::make($this->file_dir . $this->file_name)->orientate();
+    $image = Image::make($this->upload_path . $this->file_name)->orientate();
 
     $image->resize($this->preset->width, $this->preset->height , function ($constraint) {
       $constraint->aspectRatio();
@@ -420,7 +433,7 @@ class Imagecache {
    * @return
    */
   private function buildImageCrop () {
-    $image = Image::make($this->file_dir . $this->file_name)->orientate();
+    $image = Image::make($this->upload_path . $this->file_name)->orientate();
 
     if ($this->preset->width == 0) {
       $image->heighten($this->preset->height);
@@ -441,7 +454,7 @@ class Imagecache {
    * @return string
    */
   private function get_cached_image_path() {
-    return $this->ic_dir . $this->preset->name .'/'. $this->file_name;
+    return $this->imagecache_uri . $this->preset->name .'/'. $this->file_name;
   }
 
   /**
@@ -450,16 +463,7 @@ class Imagecache {
    * @return string
    */
   private function get_original_image_path() {
-    return $this->file_dir . $this->file_name;
-  }
-
-  /**
-   * The full path to the original image relative to the file system root
-   *
-   * @return string
-   */
-  private function get_full_path_to_original_image() {
-    return $this->public_path . $this->file_dir . $this->file_name;
+    return $this->upload_path . $this->file_name;
   }
 
   /**
@@ -564,7 +568,7 @@ class Imagecache {
     $presets = $this->get_presets();
 
     foreach ($presets as $key => $preset) {
-      $file_name = $this->public_path . $this->ic_dir . $key .'/'. $this->file_name;
+      $file_name = $this->imagecache_path . $key .'/'. $this->file_name;
       if (File::exists($file_name)) {
         File::delete($file_name);
       }
