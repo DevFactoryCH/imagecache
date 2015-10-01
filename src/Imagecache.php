@@ -36,32 +36,33 @@ class Imagecache {
    */
   protected $public_path;
 
+  /**
+   * The URI relative to the public path where images are stored/uploaded
+   *
+   * @var string
+   **/
   protected $upload_uri;
+
+  /**
+   * The absolute path where images are stored/uploaded
+   *
+   * @var string
+   **/
   protected $upload_path;
 
+  /**
+   * The URI relative to the public path where cached images are to be stored
+   *
+   * @var string
+   **/
   protected $imagecache_uri;
+
+  /**
+   * The absolute path where cached images are to be stored
+   *
+   * @var string
+   **/
   protected $imagecache_path;
-
-  /**
-   * The base directory to look for files taken from config
-   *
-   * @var string
-   **/
-  protected $file_dir_default;
-
-  /**
-   * The directory in which to look for the file
-   *
-   * @var string
-   **/
-  protected $file_dir;
-
-  /**
-   * The directory name to story all the imagecaches
-   *
-   * @var string
-   **/
-  protected $ic_dir;
 
   /**
    * The filename of the file relative to the file storage directory ($this->upload_path)
@@ -111,9 +112,6 @@ class Imagecache {
 
     $this->imagecache_uri = $this->sanitizeDirectoryName(config('imagecache.config.imagecache_directory'));
     $this->imagecache_path = $this->public_path . $this->imagecache_uri;
-
-//    $this->ic_dir = $this->sanitizeDirectoryName(config('imagecache.config.imagecache_directory'));
-//    $this->file_dir_default = $this->public_path . $this->sanitizeDirectoryName(config('imagecache.config.files_directory'), TRUE);
 
     $this->filename_field = config('imagecache.config.filename_field');
     $this->quality = config('imagecache.config.quality', 90);
