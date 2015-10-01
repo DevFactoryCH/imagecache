@@ -121,7 +121,7 @@ class Imagecache {
 
     $this->filename_field = config('imagecache.config.filename_field');
     $this->quality = config('imagecache.config.quality', 90);
-    $this->use_placeholders = config('imagecache.use_placeholders', FALSE);
+    $this->use_placeholders = config('imagecache.config.use_placeholders', FALSE);
   }
 
   /**
@@ -575,7 +575,7 @@ class Imagecache {
   }
 
   private function generate_placeholder() {
-    $src = 'http://www.placeholdr.pics/'. $this->preset->width .'x'. $this->preset->height;
+    $src = 'http://www.placeholdr.pics/'. $this->preset->width .'/'. $this->preset->height;
 
     $class = $this->get_class();
 
