@@ -105,16 +105,16 @@ class Imagecache {
    * @return void
    */
   public function __construct()  {
-    $this->public_path = $this->sanitizeDirectoryName(config('imagecache.config.public_path'), TRUE);
+    $this->public_path = $this->sanitizeDirectoryName(Config::get('imagecache.config.public_path'), TRUE);
 
-    $this->upload_uri = $this->sanitizeDirectoryName(config('imagecache.config.files_directory'), TRUE);
+    $this->upload_uri = $this->sanitizeDirectoryName(Config::get('imagecache.config.files_directory'), TRUE);
     $this->upload_path = $this->public_path . $this->upload_uri;
 
-    $this->imagecache_uri = $this->sanitizeDirectoryName(config('imagecache.config.imagecache_directory'));
+    $this->imagecache_uri = $this->sanitizeDirectoryName(Config::get('imagecache.config.imagecache_directory'));
     $this->imagecache_path = $this->public_path . $this->imagecache_uri;
 
-    $this->filename_field = config('imagecache.config.filename_field');
-    $this->quality = config('imagecache.config.quality', 90);
+    $this->filename_field = Config::get('imagecache.config.filename_field');
+    $this->quality = Config::get('imagecache.config.quality', 90);
   }
 
   /**
