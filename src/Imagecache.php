@@ -372,7 +372,6 @@ class Imagecache {
     $type = $finfo->file($this->upload_path . $this->file_name);
 
     if (str_contains($type, 'image')) {
->>>>>>> c7a7747... Fixed a couple bugs where I missed a new varaible or put the wrong one
       return TRUE;
     }
 
