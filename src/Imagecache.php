@@ -487,7 +487,7 @@ class Imagecache {
    * @return string
    */
   private function get_cached_image_path() {
-    return $this->public_path . $this->get_cached_image_urî();
+    return $this->public_path . $this->get_cached_image_uri();
   }
 
   /**
