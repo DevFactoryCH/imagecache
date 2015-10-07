@@ -468,7 +468,7 @@ class Imagecache {
    *
    * @return string
    */
-  private function get_cached_image_path() {
+  private function get_cached_image_uri() {
     return $this->imagecache_uri . $this->preset->name .'/'. $this->file_name;
   }
 
@@ -486,8 +486,8 @@ class Imagecache {
    *
    * @return string
    */
-  private function get_full_path_to_cached_image() {
-    return $this->public_path . $this->get_cached_image_path();
+  private function get_cached_image_path() {
+    return $this->public_path . $this->get_cached_image_urî();
   }
 
   /**
@@ -527,14 +527,14 @@ class Imagecache {
    * @return array
    */
   private function image_element() {
-    $cached_image_path = $this->get_cached_image_path();
+    $cached_image_path = $this->get_cached_image_uri();
 
     $class = $this->get_class();
 
     $src = \URL::asset($cached_image_path);
 
     $data = array(
-      'path' => $this->get_full_path_to_cached_image(),
+      'path' => $this->get_cached_image_path(),
       'src' => $src,
       'img' => '<img src="'. $src .'" width="'. $this->preset->width .'" height="'. $this->preset->height .'" class="" '. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
       'img_nosize' => '<img src="'. $src .'" class=""'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>',
