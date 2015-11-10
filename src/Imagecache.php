@@ -257,7 +257,7 @@ class Imagecache {
    * @return void
    */
   private function setupArguments($args) {
-    $this->upload_path = (isset($args['base_dir']) ? $args['base_dir'] : $this->upload_path);
+    $this->upload_path = (isset($args['base_dir']) ? $args['base_dir'] : $this->public_path . $this->upload_uri);
     $this->class = (isset($args['class']) ? $args['class'] : NULL);
     $this->alt = isset($args['alt']) ? $args['alt'] : $this->parseAlt();
     $this->title = isset($args['title']) ? $args['title'] : $this->parseTitle();
