@@ -44,7 +44,7 @@ class ImagecacheServiceProvider extends ServiceProvider {
    * @return void
    */
   protected function registerServices() {
-    $this->app->bindShared('imagecache', function ($app) {
+    $this->app->singleton('imagecache', function ($app) {
       return new Imagecache();
     });
   }
