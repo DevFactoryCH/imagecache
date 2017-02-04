@@ -542,7 +542,7 @@ class Imagecache {
 
     $class = $this->get_class();
 
-    $src = \URL::asset($cached_image_path);
+    $src = url($cached_image_path);
 
     $data = array(
       'path' => $this->get_full_path_to_cached_image(),
@@ -599,7 +599,7 @@ class Imagecache {
     $path = $this->get_original_image_path();
     $class = $this->get_class();
 
-    $data['src'] = \URL::asset($path);
+    $data['src'] = url($path);
     $data['img'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
     $data['img_nosize'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
 
