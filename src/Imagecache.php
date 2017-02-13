@@ -106,6 +106,13 @@ class Imagecache {
   protected $use_placeholders;
 
   /**
+   * The laravel request object
+   *
+   * @var Illuminate\Http\Request
+   */
+  protected $request;
+
+  /**
    * __construct
    *
    * @return void
@@ -122,6 +129,8 @@ class Imagecache {
     $this->filename_field = config('imagecache.config.filename_field');
     $this->quality = config('imagecache.config.quality', 90);
     $this->use_placeholders = config('imagecache.config.use_placeholders', FALSE);
+
+    $this->request = request();
   }
 
   /**
@@ -137,7 +146,7 @@ class Imagecache {
    * @return string
    *  The sanitized path
    */
-  private function sanitizeDirectoryName($name, $keep_leading_slash = FALSE) {
+  protected function sanitizeDirectoryName($name, $keep_leading_slash = FALSE) {
     if (!$keep_leading_slash) {
       $name = ltrim($name, '/\\');
     }
@@ -218,7 +227,7 @@ class Imagecache {
    *
    * @return bool
    */
-  private function setPreset($preset) {
+  protected function setPreset($preset) {
     if (!$this->validate_preset($preset)) {
       return FALSE;
     }
@@ -236,7 +245,7 @@ class Imagecache {
    * @return bool
    *  TRUE if $this->filename set, otherwise FALSE
    */
-  private function setFilename() {
+  protected function setFilename() {
     if (is_object($this->file)) {
       if (!isset($this->file->{$this->filename_field})) {
         return FALSE;
@@ -267,7 +276,7 @@ class Imagecache {
    *
    * @return void
    */
-  private function setupArguments($args) {
+  protected function setupArguments($args) {
     $this->upload_path = (isset($args['base_dir']) ? $args['base_dir'] : $this->public_path . $this->upload_uri);
     $this->class = (isset($args['class']) ? $args['class'] : NULL);
     $this->alt = isset($args['alt']) ? $args['alt'] : $this->parseAlt();
@@ -279,7 +288,7 @@ class Imagecache {
    *
    * @return string
    */
-  private function parseAlt() {
+  protected function parseAlt() {
     if (is_object($this->file)) {
       if (isset($this->file->alt)) {
         return $this->file->alt;
@@ -300,7 +309,7 @@ class Imagecache {
    *
    * @return string
    */
-  private function parseTitle() {
+  protected function parseTitle() {
     if (is_object($this->file)) {
       if (isset($this->file->title)) {
         return $this->file->title;
@@ -334,7 +343,7 @@ class Imagecache {
    *
    * @return bool
    */
-  private function validate_preset($preset) {
+  protected function validate_preset($preset) {
     if (in_array($preset, array_keys($this->get_presets()))) {
       return TRUE;
     }
@@ -347,7 +356,7 @@ class Imagecache {
    *
    * @return bool
    */
-  private function image_exists() {
+  protected function image_exists() {
     if (file_exists($this->upload_path . $this->file_name)) {
       return TRUE;
     }
@@ -361,7 +370,7 @@ class Imagecache {
    * @return
    *   TRUE if SVG and FALSE otherwise
    */
-  private function is_svg() {
+  protected function is_svg() {
     $finfo = new \finfo(FILEINFO_MIME);
     $type = $finfo->file($this->upload_path . $this->file_name);
 
@@ -378,7 +387,7 @@ class Imagecache {
    * @return
    *   TRUE if Image and FALSE otherwise
    */
-  private function is_image() {
+  protected function is_image() {
     $finfo = new \finfo(FILEINFO_MIME);
     $type = $finfo->file($this->upload_path . $this->file_name);
 
@@ -396,7 +405,7 @@ class Imagecache {
    *
    * @return bool
    */
-  private function generate_cached_image() {
+  protected function generate_cached_image() {
     $cached_image = $this->get_cached_image_path();
 
     if (file_exists($cached_image)) {
@@ -426,7 +435,7 @@ class Imagecache {
    * @return mixed
    *  FALSE if no matching method, otherwise the Image Object
    */
-  private function buildImage () {
+  protected function buildImage () {
     $method = 'buildImage'. ucfirst($this->preset->method);
     if (method_exists($this, $method)) {
       return $this->{$method}();
@@ -440,7 +449,7 @@ class Imagecache {
    *
    * @return Image Object
    */
-  private function buildImageResize() {
+  protected function buildImageResize() {
     $image = Image::make($this->upload_path . $this->file_name)->orientate();
 
     $image->resize($this->preset->width, $this->preset->height , function ($constraint) {
@@ -458,7 +467,7 @@ class Imagecache {
    *
    * @return
    */
-  private function buildImageCrop () {
+  protected function buildImageCrop () {
     $image = Image::make($this->upload_path . $this->file_name)->orientate();
 
     if ($this->preset->width == 0) {
@@ -479,7 +488,7 @@ class Imagecache {
    *
    * @return string
    */
-  private function get_cached_image_path() {
+  protected function get_cached_image_path() {
     return $this->imagecache_uri . $this->preset->name .'/'. $this->file_name;
   }
 
@@ -488,7 +497,7 @@ class Imagecache {
    *
    * @return string
    */
-  private function get_original_image_path() {
+  protected function get_original_image_path() {
     return $this->upload_uri . $this->file_name;
   }
 
@@ -497,7 +506,7 @@ class Imagecache {
    *
    * @return string
    */
-  private function get_full_path_to_cached_image() {
+  protected function get_full_path_to_cached_image() {
     return $this->public_path . $this->get_cached_image_path();
   }
 
@@ -506,7 +515,7 @@ class Imagecache {
    *
    * @return array
    */
-  private function get_preset() {
+  protected function get_preset() {
     return $this->preset;
   }
 
@@ -515,7 +524,7 @@ class Imagecache {
    *
    * @return array
    */
-  private function get_presets() {
+  protected function get_presets() {
     return config('imagecache.presets');
   }
 
@@ -524,7 +533,7 @@ class Imagecache {
    *
    * @return String
    */
-  private function get_class()  {
+  protected function get_class()  {
     if ($this->class) {
       return ' class="'. $this->class .'"';
     }
@@ -533,16 +542,29 @@ class Imagecache {
   }
 
   /**
+   * Generate the URL taking into account HTTP and HTTPS of the server
+   *
+   * @return String
+   */
+  protected function generateUrl($image_path) {
+    if ($this->request->secure()) {
+      return url_secure($image_path);
+    }
+
+    return url($image_path);
+  }
+
+  /**
    * Generate the image element and src to use in the calling script
    *
    * @return array
    */
-  private function image_element() {
+  protected function image_element() {
     $cached_image_path = $this->get_cached_image_path();
 
     $class = $this->get_class();
 
-    $src = \URL::asset($cached_image_path);
+    $src = $this->generateUrl($cached_image_path);
 
     $data = array(
       'path' => $this->get_full_path_to_cached_image(),
@@ -559,7 +581,7 @@ class Imagecache {
    *
    * @return array
    */
-  private function image_element_empty() {
+  protected function image_element_empty() {
     if ($this->use_placeholders) {
       return $this->generate_placeholder();
     }
@@ -574,7 +596,7 @@ class Imagecache {
     return (object) $data;
   }
 
-  private function generate_placeholder() {
+  protected function generate_placeholder() {
     $src = 'http://www.placeholdr.pics/'. $this->preset->width .'/'. $this->preset->height;
 
     $class = $this->get_class();
@@ -595,11 +617,11 @@ class Imagecache {
    *
    * @return array
    */
-  private function image_element_original() {
+  protected function image_element_original() {
     $path = $this->get_original_image_path();
     $class = $this->get_class();
 
-    $data['src'] = \URL::asset($path);
+    $data['src'] = $this->generateUrl($path);
     $data['img'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
     $data['img_nosize'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
 
@@ -610,7 +632,7 @@ class Imagecache {
    * Delete every image preset for one image
    *
    */
-  private function delete_image() {
+  protected function delete_image() {
     $presets = $this->get_presets();
 
     foreach ($presets as $key => $preset) {
