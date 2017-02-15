@@ -548,7 +548,7 @@ class Imagecache {
    */
   protected function generateUrl($image_path) {
     if ($this->request->secure()) {
-      return url_secure($image_path);
+      return secure_url($image_path);
     }
 
     return url($image_path);
