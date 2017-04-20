@@ -462,14 +462,20 @@ class Imagecache {
     $image = Image::make($this->upload_path . $this->file_name)->orientate();
 
     if ($this->preset->width == 0) {
-      $image->heighten($this->preset->height);
-    }
-    else if ($this->preset->height == 0) {
-      $image->widen($this->preset->width);
-    }
-    else {
-      $image->fit($this->preset->width, $this->preset->height);
-    }
+		$image->heighten($this->preset->height, function($constraint){
+			$constraint->upsize();
+		});
+	}
+	else if ($this->preset->height == 0) {
+		$image->widen($this->preset->width, function($constraint){
+			$constraint->upsize();
+		});
+	}
+	else {
+		$image->fit($this->preset->width, $this->preset->height, function($constraint){
+			$constraint->upsize();
+		});
+	}
 
     return $image;
   }
