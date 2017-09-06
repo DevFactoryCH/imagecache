@@ -55,6 +55,13 @@ class Imagecache {
    * @var string
    **/
   protected $imagecache_uri;
+  
+  /**
+   * Custom URI for cached images that can be overriden by clients.
+   *
+   * @var string
+   **/
+  protected $imagecache_custom_uri;
 
   /**
    * The absolute path where cached images are to be stored
@@ -272,6 +279,7 @@ class Imagecache {
     $this->class = (isset($args['class']) ? $args['class'] : NULL);
     $this->alt = isset($args['alt']) ? $args['alt'] : $this->parseAlt();
     $this->title = isset($args['title']) ? $args['title'] : $this->parseTitle();
+    $this->imagecache_custom_uri = isset($args['custom_uri']) ? $args['custom_uri'] : null;
   }
 
   /**
@@ -486,7 +494,8 @@ class Imagecache {
    * @return string
    */
   private function get_cached_image_path() {
-    return $this->imagecache_uri . $this->preset->name .'/'. $this->file_name;
+    $baseUri = $this->imagecache_custom_uri ?: $this->imagecache_uri;
+    return $baseUri . $this->preset->name .'/'. $this->file_name;
   }
 
   /**
