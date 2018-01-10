@@ -2,7 +2,7 @@
 [![Laravel](https://img.shields.io/badge/Laravel-5.0-orange.svg?style=flat-square)](http://laravel.com)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
 
-#Imagecache
+# Imagecache
 
 Laravel 4/5 package that allows you to create image thumbnails according to predefined presets, and store them in your Laravel public folder to serve them up without generating them on each page load.
 
@@ -93,7 +93,8 @@ return array(
 |`alt`|The `alt` text for the image|
 |`title`|The `title` text for the image|
 
-####Return Value:
+#### Return Value:
+
 |Property|Description|
 |------|-----------|
 |`src`|The URL to the image to be used inside the `<img src="">` attribute|
@@ -111,6 +112,7 @@ echo '<img src="'. $image->src .'">
 // Directly in a blade template
 {{ Imagecache::get('uploads/images/sunset.jpg', 'teaser')->img }}
 ```
+
 You can also directly access one of the properties as such without needing to if gate the call to `get()`. If using *Laravel 5* you'll need to use the new raw notation instead of the double curly braces `{{ ... }}`.
 
 ```php
