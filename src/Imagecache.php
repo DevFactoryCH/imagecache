@@ -457,8 +457,12 @@ class Imagecache {
       $constraint->upsize();
     });
 
-    $image->resizeCanvas($this->preset->width, $this->preset->height, 'center', FALSE, isset($this->preset->background_color) ? $this->preset->background_color : '#000000');
-
+    //if background_color is not set, do not resizeCanvas with black color, to avoid black zones in images. 
+    if(isset($this->preset->background_color))
+    {
+      $image->resizeCanvas($this->preset->width, $this->preset->height, 'center', FALSE, $this->preset->background_color);
+    }
+    
     return $image;
   }
 
