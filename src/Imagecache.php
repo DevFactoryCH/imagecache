@@ -55,6 +55,13 @@ class Imagecache {
    * @var string
    **/
   protected $imagecache_uri;
+  
+  /**
+   * Custom URI for cached images that can be overriden by clients.
+   *
+   * @var string
+   **/
+  protected $imagecache_custom_uri;
 
   /**
    * The absolute path where cached images are to be stored
@@ -272,6 +279,7 @@ class Imagecache {
     $this->class = (isset($args['class']) ? $args['class'] : NULL);
     $this->alt = isset($args['alt']) ? $args['alt'] : $this->parseAlt();
     $this->title = isset($args['title']) ? $args['title'] : $this->parseTitle();
+    $this->imagecache_custom_uri = isset($args['custom_uri']) ? $args['custom_uri'] : null;
   }
 
   /**
@@ -462,14 +470,20 @@ class Imagecache {
     $image = Image::make($this->upload_path . $this->file_name)->orientate();
 
     if ($this->preset->width == 0) {
-      $image->heighten($this->preset->height);
-    }
-    else if ($this->preset->height == 0) {
-      $image->widen($this->preset->width);
-    }
-    else {
-      $image->fit($this->preset->width, $this->preset->height);
-    }
+		$image->heighten($this->preset->height, function($constraint){
+			$constraint->upsize();
+		});
+	}
+	else if ($this->preset->height == 0) {
+		$image->widen($this->preset->width, function($constraint){
+			$constraint->upsize();
+		});
+	}
+	else {
+		$image->fit($this->preset->width, $this->preset->height, function($constraint){
+			$constraint->upsize();
+		});
+	}
 
     return $image;
   }
@@ -480,7 +494,8 @@ class Imagecache {
    * @return string
    */
   private function get_cached_image_path() {
-    return $this->imagecache_uri . $this->preset->name .'/'. $this->file_name;
+    $baseUri = $this->imagecache_custom_uri ?: $this->imagecache_uri;
+    return $baseUri . $this->preset->name .'/'. $this->file_name;
   }
 
   /**
@@ -542,7 +557,7 @@ class Imagecache {
 
     $class = $this->get_class();
 
-    $src = \URL::asset($cached_image_path);
+    $src = url($cached_image_path, [], config('imagecache.config.secure_url'));
 
     $data = array(
       'path' => $this->get_full_path_to_cached_image(),
@@ -599,7 +614,7 @@ class Imagecache {
     $path = $this->get_original_image_path();
     $class = $this->get_class();
 
-    $data['src'] = \URL::asset($path);
+    $data['src'] = url($path, [], config('imagecache.config.secure_url'));
     $data['img'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
     $data['img_nosize'] = '<img src="'. $data['src'] .'"'. $class .' alt="'. $this->alt .'" title="'. $this->title .'"/>';
 

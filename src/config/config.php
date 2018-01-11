@@ -38,4 +38,9 @@ return array(
    * Served through www.placeholdr.pics
    */
   'use_placeholders' => FALSE,
+  
+  /**
+  *	Whether to generate http or https links.
+  */
+  'secure_url' => env('IMAGECACHE_SECURE_URL', false),
 );
