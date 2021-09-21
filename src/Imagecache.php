@@ -192,9 +192,9 @@ class Imagecache
             return $this->image_element_empty();
         }
 
-        // if ($this->is_svg()) {
-        //     return (object) $this->image_element_original();
-        // }
+        if ($this->is_svg()) {
+            return (object) $this->image_element_original();
+        }
 
         if (!$this->generate_cached_image()) {
             return $this->image_element_empty();
