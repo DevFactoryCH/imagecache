@@ -1,5 +1,6 @@
 <?php namespace Devfactory\Imagecache;
 
+use Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
@@ -371,8 +372,12 @@ class Imagecache
      */
     protected function image_exists()
     {
-        if (Storage::exists($this->file_name)) {
-            return true;
+        try {
+            if (Storage::exists($this->file_name)) {
+                return true;
+            }
+        } catch (Exception $e) {
+            return false;
         }
 
         return false;
